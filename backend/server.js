@@ -14,12 +14,12 @@ app.get("/", (req, res) => {
 });
 
 //show all chat
-app.get("/api/chat", (req, res) => {
+app.get("/api/chats", (req, res) => {
     res.send(chats)
 });
 
 //find single chat through id
-app.get("/api/chat/:id", (req, res) => {
+app.get("/api/chats/:id", (req, res) => {
     // console.log(req.params.id);
     const singleChat = chats.find((c) => c._id === req.params.id);
     res.send(singleChat);
