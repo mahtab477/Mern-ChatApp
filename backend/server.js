@@ -3,11 +3,12 @@ const dotenv = require("dotenv");
 const { chats } = require("./data/data");
 const connectDB = require("./config/db.js");
 const color = require("colors");
-const userRoutes = require("./routes/userRoutes.js")
+const userRoutes = require("./routes/userRoutes.js");
+const { notFound, errorHandler } = require("./middleware/errorMiddleware.js");
 
 dotenv.config();
 
-connectDB();
+connectDB();//connect database
 
 const app = express();
 
@@ -24,7 +25,11 @@ app.get("/", (req, res) => {
     res.send("API is Running");
 });
 
-app.use("/api/user", userRoutes);
+app.use("/api/user", userRoutes);//routes
+
+//error middleware
+app.use(notFound);
+app.use(errorHandler);
 
 // //show all chat
 // app.get("/api/chats", (req, res) => {
