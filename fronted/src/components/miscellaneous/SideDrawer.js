@@ -135,7 +135,7 @@ const SideDrawer = () => {
           placeContent="bottom-end"
         >
           <Button variant="ghost" onClick={onOpen}>
-            <i class="fa fa-search"></i>
+            <i className="fa fa-search"></i>
             <Text d={{ base: "none", md: "flex" }} px="4">
               Search User
             </Text>
