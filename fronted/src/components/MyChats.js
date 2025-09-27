@@ -7,40 +7,39 @@ import ChatLoading from './ChatLoading';
 import { getSender } from '../config/ChatLogics';
 import GroupChatModal from './miscellaneous/GroupChatModal';
 
-const MyChats = () => {
-    const [loggedUser, setloggedUser] = useState();
-    const { user,selectedChat, setSelectedChat, chats, setChats } = ChatState();
-    
-    const toast = useToast();
+const MyChats = ({ fetchAgain }) => {
+  const [loggedUser, setloggedUser] = useState();
+  const { user, selectedChat, setSelectedChat, chats, setChats } = ChatState();
 
-    const fetchChats = async () => {
-        try {
-            const config = {
-                headers: {
-                    Authorization: `Bearer ${user.token}`,
-                },
-            };
+  const toast = useToast();
 
-            const { data } = await axios.get("/api/chat", config);
-            console.log(data);
-            setChats(data);
-        } catch (error) {
-            toast({
-                title: "Error occured",
-                description: "Fialed to Load the chats",
-                status: "error",
-                duration: 5000,
-                isClosable: true,
-                position: "bottom-left",
-            });
-        }
-    };
+  const fetchChats = async () => {
+    try {
+      const config = {
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+        },
+      };
 
-    useEffect(() => {
-        setloggedUser(JSON.parse(localStorage.getItem("userInfo")));
-        fetchChats();
-    },[])
+      const { data } = await axios.get("/api/chat", config);
+      console.log(data);
+      setChats(data);
+    } catch (error) {
+      toast({
+        title: "Error occured",
+        description: "Fialed to Load the chats",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+        position: "bottom-left",
+      });
+    }
+  };
 
+  useEffect(() => {
+    setloggedUser(JSON.parse(localStorage.getItem("userInfo")));
+    fetchChats();
+  }, [fetchAgain]);
 
   return (
     <Box
@@ -89,16 +88,16 @@ const MyChats = () => {
               <Box
                 onClick={() => setSelectedChat(chat)}
                 cursor="pointer"
-                bg={selectedChat === chat ? "green" : "white"}
+                bg={selectedChat === chat ? "green" : "yellow"}
                 px={3}
                 py={3}
                 borderRadius="lg"
-                key={chat._id}
+                key={chat._id + "-chat"}
               >
                 <Text>
                   {!chat.isGroupChat
                     ? getSender(loggedUser, chat.users)
-                    : chat.chatname}
+                    : chat.chatName}
                 </Text>
               </Box>
             ))}
@@ -109,6 +108,6 @@ const MyChats = () => {
       </Box>
     </Box>
   );
-}
+};
 
 export default MyChats;

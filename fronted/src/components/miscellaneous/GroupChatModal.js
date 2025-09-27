@@ -33,7 +33,7 @@ const GroupChatModal = ({ children }) => {
             };
             
             const { data } = await axios.get(`/api/user/?search=${search}`, config);
-            console.log(data);
+            // console.log(data);
             setLoading(false);
             setSearchResult(data);
                 
@@ -50,9 +50,51 @@ const GroupChatModal = ({ children }) => {
         }
     };
 
-    const handleSubmit = () => {
-        
-    }
+    const handleSubmit = async() => {
+      if (!groupChatName || !selectedUsers) {
+          toast({
+            title: "Please fill all the fields",
+            status: "warning",
+            duration: 5000,
+            isClosable: true,
+            position: "top",
+          });
+        return;
+      }
+      
+      try {
+        const config = {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
+        };
+
+        const { data } = await axios.post("/api/chat/group", {
+          name: groupChatName,
+          users: JSON.stringify(selectedUsers.map((u) => u._id)),
+        }, config);
+
+        setChats([data, ...chats]);
+        onClose();
+        toast({
+          title: "New Group Chat Created",
+          status: "success",
+          duration: 5000,
+          isClosable: true,
+          position: "bottom",
+        });
+      } catch (error) {
+        toast({
+          title: "Failed to create the chat",
+          description: error.response.data,
+          status: "errro",
+          duration: 5000,
+          isClosable: true,
+          position: "bottom",
+        });
+      }
+  }
+  
     const handleDelete = (delUser) => {
         setSelectedUsers(selectedUsers.filter((sel) => sel._id  !== delUser._id));
     }
@@ -105,9 +147,9 @@ const GroupChatModal = ({ children }) => {
            </FormControl>
            {/* selected users */}
            <Box width="100%" display="flex" flexWrap="wrap">
-             {selectedUsers.map((u) => (
+             {selectedUsers.map((u,index) => (
                <UserBadgeItem
-                 key={user._id}
+                 key={user._id|| index}
                  user={u}
                  handleFunction={() => handleDelete(u)}
                />
