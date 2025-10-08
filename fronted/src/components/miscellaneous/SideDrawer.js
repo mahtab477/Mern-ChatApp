@@ -27,6 +27,9 @@ import { useHistory } from "react-router-dom";
 import axios from "axios";
 import ChatLoading from "../ChatLoading";
 import UserListItem from "../UserAvatar/UserListItem";
+import { getSender } from "../../config/ChatLogics";
+import {Effect} from "react-notification-badge";
+import NotificationBadge from "react-notification-badge"
 
 const SideDrawer = () => {
   const [search, setSearch] = useState("");
@@ -34,16 +37,23 @@ const SideDrawer = () => {
   const [loading, setloading] = useState(false);
   const [loadingChat, setLoadingChat] = useState();
 
-  const { user,setSelectedChat,chats,setChats } = ChatState();
+  const {
+    user,
+    setSelectedChat,
+    chats,
+    setChats,
+    notification,
+    setNotification,
+  } = ChatState();
   const history = useHistory();
-    const { isOpen, onOpen, onClose } = useDisclosure();
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
   // console.log(history);
 
   const logoutHandler = () => {
     localStorage.removeItem("userInfo");
     history.push("/");
-  }
+  };
 
   const toast = useToast();
 
@@ -99,7 +109,7 @@ const SideDrawer = () => {
 
       if (!chats.find((c) => c._id === data._id)) {
         setChats([data, ...chats]);
-      } 
+      }
 
       setSelectedChat(data);
       setLoadingChat(false);
@@ -115,8 +125,6 @@ const SideDrawer = () => {
       });
     }
   };
-
-
 
   return (
     <>
@@ -148,10 +156,47 @@ const SideDrawer = () => {
 
         <div>
           <Menu>
-            <MenuButton>
+            <MenuButton p={1}>
+              {/* <NotificationBadge
+                count={notification.length}
+                effect={Effect.SCALE}
+              /> */}
+              {notification.length > 0 && (
+                <Box
+                  as="span"
+                  bg="red.500"
+                  color="white"
+                  borderRadius="full"
+                  px={2}
+                  fontSize="xs"
+                  position="relative"
+                  top="-8px"
+                  right="8px"
+                >
+                  {notification.length}
+                </Box>
+              )}
+
               <BellIcon fontSize="2xl" m={1} />
             </MenuButton>
-            {/* <MenuList></MenuList> */}
+            <MenuList pl={2}>
+              {!notification.length && "No New Message"}
+              {notification.map((notif) => (
+                <MenuItem
+                  key={notif._id}
+                  onClick={() => {
+                    setSelectedChat(notif.chat);
+                    setNotification(
+                      notification.filter((n) => n.chat._id !== notif.chat._id)
+                    );
+                  }}
+                >
+                  {notif.chat.isGroupChat
+                    ? `New Message in ${notif.chat.chatName}`
+                    : `New Message from ${getSender(user, notif.chat.users)}`}
+                </MenuItem>
+              ))}
+            </MenuList>
           </Menu>
           <Menu>
             <MenuButton as={Button} rightIcon={<ChevronDownIcon />}>
@@ -185,24 +230,20 @@ const SideDrawer = () => {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
-              <Button
-              onClick={handleSearch}
-              >
-                Go
-              </Button>
+              <Button onClick={handleSearch}>Go</Button>
             </Box>
-            {loading ? (<ChatLoading />) :
-              (
-                searchResult?.map(user => (
-                  <UserListItem
-                    key={user._id}
-                    user={user}
-                    handleFunction={()=>accessChat(user._id)}
-                  />
-                ))
-              )
-            }
-            {loadingChat && <Spinner ml="auto" display="flex"/>}
+            {loading ? (
+              <ChatLoading />
+            ) : (
+              searchResult?.map((user) => (
+                <UserListItem
+                  key={user._id}
+                  user={user}
+                  handleFunction={() => accessChat(user._id)}
+                />
+              ))
+            )}
+            {loadingChat && <Spinner ml="auto" display="flex" />}
           </DrawerBody>
         </DrawerContent>
       </Drawer>
