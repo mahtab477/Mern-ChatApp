@@ -7,6 +7,7 @@ const userRoutes = require("./routes/userRoutes.js");
 const chatRoutes = require("./routes/chatRoutes.js");
 const messageRoutes = require("./routes/messageRoutes.js");
 const { notFound, errorHandler } = require("./middleware/errorMiddleware.js");
+const path = require("path")
 
 dotenv.config();
 
@@ -23,14 +24,31 @@ app.use(express.json()); //to accept json data
 // let port = 5000;
 
 //create first api
-app.get("/", (req, res) => {
-    res.send("API is Running");
-});
+// app.get("/", (req, res) => {
+//     res.send("API is Running Successfully");
+// });
 
 //routes
 app.use("/api/user", userRoutes);
 app.use("/api/chat", chatRoutes);
 app.use("/api/message", messageRoutes);
+
+//--------------------deployement-------------------
+
+const __dirname1 = path.resolve();
+if (process.env.NODE_ENV === "production") {
+    app.use(express.static(path.join(__dirname1, "/fronted/build")));
+
+    app.get("/*", (req, res) => {
+        res.sendFile(path.resolve(__dirname1, "fronted", "build", "index.html"));
+    });
+} else {
+    app.get("/", (req, res) => {
+      res.send("API is Running Successfully");
+    });
+}
+
+//--------------------deployement-------------------
 
 //error middleware
 app.use(notFound);
